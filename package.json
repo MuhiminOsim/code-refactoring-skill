@@ -1,0 +1,31 @@
+{
+  "name": "code-refactoring-skill",
+  "version": "1.0.0",
+  "description": "World-class refactoring skill for any AI coding agent — Claude Code, Cursor, Aider, and more.",
+  "bin": {
+    "code-refactoring-skill": "bin/install.js"
+  },
+  "files": [
+    "bin/",
+    "SKILL.md",
+    "PROMPT.md",
+    "references/",
+    "agents/"
+  ],
+  "keywords": [
+    "claude-code",
+    "refactoring",
+    "skill",
+    "ai",
+    "coding"
+  ],
+  "author": "Muhiminul Islam Osim",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MuhiminOsim/code-refactoring-skill.git"
+  },
+  "engines": {
+    "node": ">=14"
+  }
+}

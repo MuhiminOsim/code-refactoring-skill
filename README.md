@@ -21,20 +21,58 @@ Built on Martin Fowler's refactoring catalog, extended with modern patterns for 
 
 ## Installation
 
-### Universal (any agent)
+### Interactive installer
+
+```bash
+npx code-refactoring-skill
+```
+
+Prompts for:
+1. **Scope** — Global (home dir, all projects) or Project (current directory)
+2. **Agent(s)** — pick one, several, or all
+
+| # | Agent | Global install path | Project install path |
+|---|---|---|---|
+| 1 | Any / Generic | `~/.agents/skills/refactor/` | — |
+| 2 | Claude Code | `~/.claude/skills/refactor/` | — |
+| 3 | Aider | `~/.aider-refactor-skill/` | `CONVENTIONS.md` |
+| 4 | Gemini CLI | `~/.gemini/refactor-prompt.md` | `GEMINI.md` |
+| 5 | Continue | `~/.continue/refactor-prompt.md` | `.continuerules` |
+| 6 | Cursor | `~/.cursor/rules/refactor.mdc` | `.cursor/rules/refactor.mdc` |
+| 7 | Windsurf | `~/.codeium/windsurf/memories/refactor.md` | `.windsurfrules` |
+| 8 | GitHub Copilot | `~/.config/github-copilot/refactor-prompt.md` | `.github/copilot-instructions.md` |
+| 9 | Zed | `~/.config/zed/refactor-prompt.md` | `.rules` |
+| 10 | Amazon Q | `~/.aws/amazonq/rules/refactor.md` | `.amazonq/rules/refactor.md` |
+| 11 | OpenHands | — | `.openhands/microagents/refactor.md` |
+| 12 | Sourcegraph Cody | — | `.cody/context.md` |
+| 13 | OpenAI Assistants | `~/.openai-refactor-skill/PROMPT.md` | — |
+
+### Manual install (any agent)
 
 Copy [`PROMPT.md`](PROMPT.md) into your agent's system prompt, custom instructions, or rules file. That's the complete self-contained skill — no other files needed.
 
 ```bash
-# Download the prompt
 curl -O https://raw.githubusercontent.com/MuhiminOsim/code-refactoring-skill/main/PROMPT.md
 ```
 
-Then paste its contents into your agent's system instructions.
+For a generic global install:
+
+```bash
+mkdir -p ~/.agents/skills/refactor
+curl -o ~/.agents/skills/refactor/PROMPT.md \
+  https://raw.githubusercontent.com/MuhiminOsim/code-refactoring-skill/main/PROMPT.md
+```
+
+### Claude Code (git install)
+
+```bash
+git clone https://github.com/MuhiminOsim/code-refactoring-skill \
+  ~/.claude/skills/refactor
+```
+
+The skill auto-activates — no configuration needed.
 
 ### Agent-specific setup guides
-
-> Don't see your tool? Read [agents/generic.md](agents/generic.md) — the universal pattern works for any agent that accepts a system prompt.
 
 | Agent / CLI | Guide |
 |---|---|
@@ -52,15 +90,6 @@ Then paste its contents into your agent's system instructions.
 | OpenHands | [agents/openhands.md](agents/openhands.md) |
 | llm, sgpt, Ollama, LM Studio | [agents/llm-cli.md](agents/llm-cli.md) |
 | OpenAI Assistants / ChatGPT | [agents/openai-assistants.md](agents/openai-assistants.md) |
-
-### Claude Code (one-line install)
-
-```bash
-git clone https://github.com/MuhiminOsim/code-refactoring-skill \
-  ~/.claude/skills/refactor
-```
-
-The skill auto-activates — no configuration needed.
 
 ---
 
@@ -261,7 +290,7 @@ Safety protocols must be read in full and are not operation-specific. Scattering
 
 Pull requests welcome. Areas that would strengthen the skill:
 
-- Agent setup guides for additional tools (Windsurf, Zed, Amp, Gemini CLI, etc.)
+- Agent setup guides for additional tools (Amp, Cline, Goose, etc.)
 - Additional language profiles (PHP, Dart, Elixir, Haskell, Scala)
 - Domain-specific patterns (database query refactoring, API design patterns)
 - More modern idioms per language as standards evolve
