@@ -1,6 +1,6 @@
 {
   "name": "code-refactoring-skill",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "World-class refactoring skill for any AI coding agent — Claude Code, Cursor, Aider, and more.",
   "bin": {
     "code-refactoring-skill": "bin/install.js"
