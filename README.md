@@ -1,6 +1,6 @@
 # Code Refactoring Skill
 
-A world-class refactoring skill for **any AI coding agent**. Safe, incremental, behavior-preserving code improvements for any programming language.
+A stable refactoring skill for **any AI coding agent**. Safe, incremental, behavior-preserving code improvements for any programming language.
 
 Works with Claude Code, Cursor, Aider, Continue, GitHub Copilot, OpenAI Assistants, or any LLM that accepts a system prompt.
 
