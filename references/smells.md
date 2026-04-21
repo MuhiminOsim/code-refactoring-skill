@@ -316,6 +316,141 @@ Inappropriate coupling between classes or modules.
 
 ---
 
+## Family 6: Architectural Violations
+
+Code where responsibilities have leaked across architectural layer boundaries. These smells indicate that the structural separation intended by a pattern (MVC, MVP, MVVM, Clean Architecture, Hexagonal) has eroded. They are detected at the file/module level, not the line level.
+
+**When any of these is found:** Do not proceed with code-level refactoring until the architectural violation is addressed, or explicitly agree with the user to leave it. Read `safety.md` §8 before acting on any of these smells.
+
+---
+
+### Fat Controller / Fat Route Handler
+**Symptoms:**
+- Controller, route handler, or Activity/Fragment exceeds ~50 lines
+- Controller contains `if/else` chains implementing business rules (pricing, eligibility, discounts)
+- Controller calls 4+ services in sequence to complete one action
+- Controller sends emails, enqueues jobs, or performs calculations directly
+- Controller is hard to unit test without spinning up the full web framework
+
+**Detection:**
+```
+# Count controller/handler lines:
+grep -n "class.*Controller\|def.*route\|app\.(get\|post\|put\|delete)" <file>
+# Look for business rule keywords in controllers:
+grep -n "discount\|eligibility\|calculate\|if.*status\|if.*role" controllers/
+```
+
+**Severity:** Major if >50 lines with domain logic; Blocker if business rules are duplicated across controllers.
+
+**Recommended:** Extract Use Case / Interactor (catalog-architecture.md), Push Business Logic to Domain (catalog-architecture.md)
+
+---
+
+### UI with Business Logic
+**Symptoms:**
+- View, Activity, Fragment, or Component computes derived state (totals, filtered lists, formatted values)
+- Event handler contains domain validation (`if (age < 18) return error`)
+- Component directly calls a repository or database (no service/ViewModel layer)
+- Display logic is entangled with lifecycle methods, making isolated testing impossible
+
+**Detection:**
+```
+# Look for domain logic keywords in view files:
+grep -rn "calculate\|discount\|validate\|\.filter\|\.reduce\|\.map" views/ components/ activities/
+# Look for repository/DB imports in view files:
+grep -rn "import.*Repository\|import.*dao\|import.*database" views/ components/
+```
+
+**Severity:** Major.
+
+**Recommended:** Extract ViewModel (catalog-architecture.md), Introduce Presenter (catalog-architecture.md)
+
+---
+
+### Anemic Domain Model
+**Symptoms:**
+- Domain objects contain only fields and getters/setters — zero behavior
+- All logic lives in `*Service`, `*Manager`, or `*Helper` classes that take domain objects as parameters
+- The same domain rule is implemented in multiple service classes (duplication driven by the anemia)
+- Domain objects cannot enforce their own invariants (invalid state is representable)
+
+**Detection:**
+```
+# Find domain classes with no methods beyond accessors:
+grep -n "def get_\|def set_\|public get\|public set" domain/
+# Find service classes doing per-entity computation:
+grep -n "def.*calculate\|def.*validate\|def.*compute" services/
+```
+
+**Severity:** Major if business rules are duplicated; Minor if the model is simple with few rules.
+
+**Recommended:** Push Business Logic to Domain (catalog-architecture.md)
+
+---
+
+### Layer Violation
+**Symptoms:**
+- Presentation layer imports from data/repository/db packages directly (skipping domain)
+- A domain object imports a repository, service, or HTTP client
+- A controller imports a concrete ORM entity or database row type and manipulates it directly
+- The direction of the dependency arrow reverses what the architecture intends
+
+**Detection:**
+```
+# Find presentation importing from data layer:
+grep -rn "import.*repository\|import.*dao\|import.*entity" controllers/ views/ presenters/
+# Find domain importing from infrastructure:
+grep -rn "import.*http\|import.*sql\|import.*orm" domain/ models/
+```
+
+**Severity:** Major.
+
+**Recommended:** Fix Layer Violation (catalog-architecture.md), Introduce Repository (catalog-architecture.md)
+
+---
+
+### Scattered Data Access
+**Symptoms:**
+- SQL queries or ORM calls appear in controllers, services, AND presenters — no single owner
+- The same table is queried in 5+ different files with slightly different projections
+- Switching the data source (e.g., adding a cache, moving to a different DB) requires touching many files
+- No `*Repository` or `*Store` class exists for a given entity
+
+**Detection:**
+```
+# Find SQL in non-repository files:
+grep -rn "SELECT\|INSERT\|UPDATE\|DELETE\|\.find(\|\.query(" controllers/ services/ views/
+# Count files accessing the same table:
+grep -rn "FROM users\|\.findUser\|userModel\." . | grep -v "repository\|repo"
+```
+
+**Severity:** Major.
+
+**Recommended:** Introduce Repository (catalog-architecture.md)
+
+---
+
+### Missing Domain Layer
+**Symptoms:**
+- No `domain/`, `models/`, or `entities/` directory exists — only `controllers/` and `repositories/`
+- Business logic lives entirely in API handlers or utility functions
+- Adding a new business rule requires changes to both the API layer and the database layer simultaneously
+- The codebase has no "heart" — no representation of what the application is actually about
+
+**Detection:**
+```
+# Check directory structure for domain layer:
+ls src/ app/   # Is there a domain/, models/, or entities/ directory?
+# Check if controllers import directly from data layer:
+grep -rn "^import\|^from\|^require" controllers/ | grep -i "db\|sql\|orm\|repo"
+```
+
+**Severity:** Major if the application has meaningful business logic; Minor if it is a thin CRUD API.
+
+**Recommended:** Push Business Logic to Domain (catalog-architecture.md), Extract Use Case (catalog-architecture.md)
+
+---
+
 ## Smell Severity Reference
 
 | Severity | Meaning | Action |

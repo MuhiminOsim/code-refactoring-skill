@@ -173,3 +173,107 @@ Before each operation, assess your confidence:
 | **Low** | Not certain whether behavior is preserved | Stop. Either gain confidence (more reading, more test coverage) or ask the user |
 
 Never proceed at Low confidence. A refactoring you're not sure about is worse than no refactoring.
+
+---
+
+## §8 Architectural Refactoring Protocol
+
+Read this section in full before acting on any smell from **Family 6: Architectural Violations** in `smells.md`.
+
+Architectural refactoring is the highest-risk category in this skill because:
+- Multiple files are always affected
+- Logic moves between layers — subtle behavioral differences can appear even when the code looks identical
+- Cross-layer test coverage is often thin, meaning failures may not surface immediately
+- The blast radius of a mistake is large: a misplaced responsibility can cascade into build failures or runtime errors across the codebase
+
+---
+
+### §8.1 Pre-Conditions (all must be true before touching a single file)
+
+- [ ] **Current architecture is mapped.** You know which file is in which layer. Use Grep to trace imports and identify the actual layer structure — do not assume from directory names alone.
+- [ ] **Target pattern is confirmed by user.** Never assume the user wants MVVM over MVP, or Clean Architecture over Layered. Ask explicitly: *"What target architecture pattern should I refactor toward?"*
+- [ ] **Scope is bounded.** You know exactly which files will be touched and which will not.
+- [ ] **Tests exist for the logic being moved.** If no tests cover the code path being relocated, stop. Either write tests first (with user approval) or require explicit user acknowledgment of the risk.
+- [ ] **All call sites of the code being moved are mapped.** Run Grep before moving anything.
+
+---
+
+### §8.2 The Moving Invariant
+
+**Never change logic AND location in the same step.**
+
+Every architectural move uses this three-step sequence:
+
+```
+Step A — Introduce:  Create the new location. Old location delegates to new. Tests must pass.
+Step B — Redirect:   All callers updated to use new location. Old location is now dead code. Tests must pass.
+Step C — Remove:     Delete old location. Tests must pass.
+```
+
+If tests fail at any step, revert that step only — do not proceed. Do not fix forward.
+
+This invariant applies at every granularity: moving a single method, a whole class, or a group of classes all follow this same sequence.
+
+---
+
+### §8.3 Architectural Red Lines — Stop and Ask
+
+These require explicit user confirmation before any change:
+
+**Moving code that has side effects (emails, payments, job queues, audit logs)**
+Side effects must have a clear owner in the target architecture. Moving them to a different layer changes who is responsible for them and when they fire. Ask: *"After this move, which layer is responsible for triggering [side effect]?"*
+
+**Introducing a new layer where none existed**
+Adding a domain layer, a use case layer, or a repository layer to a codebase that lacks one is a large structural change. Map the full blast radius (how many files will need to import the new layer?) and confirm with user before proceeding.
+
+**Moving code that participates in a transaction boundary**
+If the code being moved is currently inside a database transaction, moving it to a different layer may place it outside the transaction scope. This can cause partial writes or lost updates. Stop and confirm transaction ownership before proceeding.
+
+**Moving a type that is part of a serialization contract**
+If the type being moved (e.g., an ORM entity) is serialized to JSON, written to a database, or shared over a protocol, moving it to a new layer or renaming it can break existing data or external consumers. This is a Red Line from §3 — treat it as such.
+
+---
+
+### §8.4 Architectural Yellow Lines — Warn and Proceed with Consent
+
+| Situation | Warning to give |
+|---|---|
+| File crosses layer boundary in more than 3 import statements | "This file has N cross-layer imports. I will address them one at a time. Confirm the order?" |
+| Introducing a Repository for an entity queried in >5 files | "The repository will affect N files. I will migrate callers one at a time. Confirm?" |
+| Domain object gaining its first dependency on anything external | "This is the domain object's first external dependency. Confirm it belongs in domain and not application layer." |
+| Adding a Use Case that spans more than 2 aggregate roots | "This Use Case touches multiple aggregates. That's a coordination concern — confirm it belongs in application layer, not domain." |
+
+---
+
+### §8.5 Architecture Mapping Protocol
+
+Before any architectural refactoring, produce a layer map. Present it to the user before proceeding.
+
+```
+Architecture Map — [Project Name]:
+┌─────────────────────────────────────────────┐
+│ Presentation  │ controllers/, views/        │
+│ Application   │ services/, use_cases/       │
+│ Domain        │ models/, domain/            │
+│ Infrastructure│ repositories/, db/, clients/│
+└─────────────────────────────────────────────┘
+
+Violations found:
+- controllers/OrderController.ts imports from repositories/ (skips domain)
+- models/User.ts imports from services/ (inverted dependency)
+
+Target pattern: [confirmed by user]
+```
+
+Do not begin Step A of any operation until this map is presented and confirmed.
+
+---
+
+### §8.6 Confidence Standard for Architectural Refactoring
+
+Architectural changes require **High** confidence before each step (see §7). Medium confidence is not sufficient because the blast radius is too large.
+
+If you are not certain that moving a piece of logic preserves behavior exactly:
+1. Read both the source and destination contexts again
+2. Trace all callers in both layers
+3. If still uncertain, do not move — ask the user to add a test that pins the behavior first

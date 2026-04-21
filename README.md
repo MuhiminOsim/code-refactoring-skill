@@ -4,18 +4,19 @@ A world-class refactoring skill for **any AI coding agent**. Safe, incremental, 
 
 Works with Claude Code, Cursor, Aider, Continue, GitHub Copilot, OpenAI Assistants, or any LLM that accepts a system prompt.
 
-Built on Martin Fowler's refactoring catalog, extended with modern patterns for functional programming, async/await, reactive systems, and dependency injection.
+Built on Martin Fowler's refactoring catalog, extended with modern patterns for functional programming, async/await, reactive systems, dependency injection, and architectural patterns (MVVM, MVP, Clean Architecture, Hexagonal, Repository, Use Case).
 
 ---
 
 ## What It Does
 
-- **Detects code smells** across 5 families (Bloat, OO Abusers, Change Preventers, Dispensables, Couplers)
-- **Applies 60+ refactoring operations** from the complete Fowler catalog + modern patterns
+- **Detects code smells** across 6 families (Bloat, OO Abusers, Change Preventers, Dispensables, Couplers, Architectural Violations)
+- **Applies 70+ refactoring operations** from the complete Fowler catalog + modern patterns + architectural patterns
+- **Handles architectural refactoring** — safely migrates toward MVVM, MVP, Clean Architecture, Repository pattern, and more
 - **Works in any language** — TypeScript, Python, Go, Rust, Java, Kotlin, C#, Swift, Ruby, C/C++, SQL, and more
 - **Tests gate every step** — runs your test suite after each change; reverts immediately on failure
 - **One operation at a time** — no bundled changes, every step is independently verifiable
-- **Safety-first** — explicit red lines for public APIs, serialization formats, and concurrent code
+- **Safety-first** — explicit red lines for public APIs, serialization formats, concurrent code, and architectural layer violations
 
 ---
 
@@ -106,6 +107,11 @@ Trigger the skill by asking Claude Code to refactor, with any of these phrases:
 | "this function is too long" | Diagnoses, extracts methods, verifies tests |
 | "remove this duplication" | Identifies shared logic, extracts and consolidates |
 | "modernize this" | Applies async/await, pipelines, value types, DI patterns |
+| "my controller is too fat" | Maps architecture, diagnoses Fat Controller smell, extracts Use Case or Presenter |
+| "I want MVVM" / "I want MVP" | Maps current architecture, confirms target pattern, migrates layer by layer |
+| "view has business logic" | Detects UI with Business Logic smell, extracts ViewModel or Presenter |
+| "introduce a repository" | Maps data access, introduces Repository interface, migrates callers one file at a time |
+| "separation of concerns" / "layer violation" | Maps layers, identifies violations, fixes with correct abstraction |
 
 ### Example session
 
@@ -164,14 +170,15 @@ Full detail: [`references/process.md`](references/process.md)
 ├── SKILL.md                      ← Skill entry point (triggers, decision tree)
 └── references/
     ├── process.md                ← Universal 5-phase workflow
-    ├── smells.md                 ← Code smell catalog (5 families, 25+ smells)
-    ├── safety.md                 ← Red lines, yellow lines, rollback protocol
+    ├── smells.md                 ← Code smell catalog (6 families, 30+ smells)
+    ├── safety.md                 ← Red lines, yellow lines, rollback + architectural protocol
     ├── catalog-composing.md      ← Extract, Inline, Split, Decompose
     ├── catalog-simplifying.md    ← Conditionals, Guards, Polymorphism
     ├── catalog-organizing.md     ← Move, Organize, Encapsulate
     ├── catalog-api.md            ← Rename, Parameter Objects, Factory
     ├── catalog-inheritance.md    ← Inheritance, Composition over Inheritance
     ├── catalog-modern.md         ← FP, Async, Reactive, DI patterns
+    ├── catalog-architecture.md   ← MVVM, MVP, Repository, Use Case, Layer Fixes
     └── language-profiles.md      ← Per-language idioms, test commands, linters
 ```
 
@@ -200,6 +207,9 @@ Async: async/await migration, Parallel consolidation (Promise.all / Task.WhenAll
 DI: Extract Interface for Testability, Replace Static with Injected Dependency, Repository Pattern  
 Reactive: Replace Polling with Observable, State Machine, Command Object  
 Idioms: Exhaustive Pattern Matching, Named Arguments, Value Types/Records
+
+### Architectural Patterns
+Extract ViewModel (MVC/MV* → MVVM), Introduce Presenter (→ MVP), Push Business Logic to Domain (Anemic → Rich Model), Introduce Repository (scattered data access → Repository pattern), Extract Use Case / Interactor (fat controller → Clean Architecture), Fix Layer Violation (restoring clean layering), Separate Read/Write Model (CQRS lite)
 
 ---
 
@@ -234,6 +244,9 @@ The skill has three tiers of safety enforcement:
 - Error contract changes (types thrown, messages matched by callers)
 - Files with no test coverage
 - Files with recent concurrent edits
+- Moving code with side effects (emails, payments, queues) between layers
+- Introducing a new architectural layer where none existed
+- Moving code that participates in a transaction boundary
 
 ### Yellow Lines (warn, require confirmation)
 - Renaming a symbol with >20 call sites
@@ -250,6 +263,14 @@ On any test failure after an edit:
 
 **The skill never fixes forward.** A refactoring that breaks a test is reverted, diagnosed, and re-approached safely.
 
+### Architectural Safety (§8)
+
+Architectural refactoring gets its own stricter protocol:
+- **Map first:** Current architecture is mapped (layers + violations) before any file is touched
+- **Confirm target:** User must confirm the target pattern before step 1
+- **The Moving Invariant:** Never change logic AND location in the same step. Every move follows: Introduce → Redirect → Remove, with tests passing after each sub-step
+- **High confidence required:** Medium confidence is not sufficient for architectural changes — blast radius is too large
+
 Full detail: [`references/safety.md`](references/safety.md)
 
 ---
@@ -265,6 +286,7 @@ Before applying any operation (when no specific operation is requested), the ski
 | **Change Preventers** | Divergent Change, Shotgun Surgery, Parallel Inheritance Hierarchies |
 | **Dispensables** | Duplicate Code, Dead Code, Lazy Class, Speculative Generality |
 | **Couplers** | Feature Envy, Inappropriate Intimacy, Message Chains, Middle Man |
+| **Architectural Violations** | Fat Controller, UI with Business Logic, Anemic Domain Model, Layer Violation, Scattered Data Access, Missing Domain Layer |
 
 Full catalog with grep patterns: [`references/smells.md`](references/smells.md)
 
@@ -283,6 +305,9 @@ A single 60-operation reference would consume too much context. The decision tre
 
 **Why is safety.md standalone?**  
 Safety protocols must be read in full and are not operation-specific. Scattering stop conditions across catalog files creates inconsistent behavior. A dedicated file makes the red lines impossible to miss.
+
+**Why does architectural refactoring need its own protocol?**  
+Code-level refactoring touches 1–3 files and has a small blast radius. Architectural refactoring is multi-file by definition, moves logic across layer boundaries, and can produce behavioral differences even when the code looks identical (transaction scope changes, side-effect timing changes, dependency direction reversal). The Moving Invariant — never change logic AND location in the same step — is what makes this safe. The Introduce → Redirect → Remove sequence ensures tests validate behavior at every sub-step.
 
 ---
 

@@ -2,13 +2,13 @@
 name: refactor
 description: >
   Safe, incremental, behavior-preserving code refactoring for ANY programming language.
-  Detects code smells, applies operations from the Fowler catalog and modern patterns,
-  makes one change at a time, verifies tests pass after each step.
-  Trigger on: "refactor", "clean up", "clean this up", "extract", "rename", "simplify",
-  "decompose", "restructure", "improve readability", "reduce complexity", "remove duplication",
-  "pull this out", "break this apart", "this is too long", "hard to understand",
-  "technical debt", "code smell", "too many parameters", "god class", "big function",
-  "make this cleaner", "this needs work", "tidy up", "reorganize", "modernize".
+  Detects code smells across 6 families (including architectural violations), applies operations
+  from the Fowler catalog, modern patterns, and architectural patterns (MVVM, MVP, Repository,
+  Use Case, Clean Architecture). Makes one change at a time, verifies tests pass after each step.
+  Trigger on: "refactor", "clean up", "extract", "rename", "simplify", "decompose",
+  "technical debt", "code smell", "god class", "big function", "modernize",
+  "MVVM", "MVP", "fat controller", "view has logic", "anemic model", "layer violation",
+  "introduce repository", "separation of concerns", "architecture", "restructure layers".
 ---
 
 # Refactoring Specialist
@@ -36,6 +36,7 @@ Safe, incremental, behavior-preserving code improvements for any language.
 | Rename, Parameter Objects, Factory | [catalog-api.md](references/catalog-api.md) |
 | Inheritance, Composition over Inheritance | [catalog-inheritance.md](references/catalog-inheritance.md) |
 | FP, Async, Reactive, DI patterns | [catalog-modern.md](references/catalog-modern.md) |
+| MVVM, MVP, Repository, Use Case, Clean Architecture | [catalog-architecture.md](references/catalog-architecture.md) |
 | Language idioms and test commands | [language-profiles.md](references/language-profiles.md) |
 
 ---
@@ -51,6 +52,9 @@ Safe, incremental, behavior-preserving code improvements for any language.
 **Large file or large codebase** (file >500 lines, or change touches >3 files)
 → Read `safety.md` §6 Large Codebase Protocol before anything else.
 
+**Architectural scope** (user mentions pattern names, layer problems, or any trigger below marked [arch])
+→ Read `smells.md` Family 6. Map current architecture (Grep import statements, identify layers). Present architecture map. Ask: *"What target pattern?"* Confirm with user. Then read `safety.md` §8 in full before touching anything. Use operations from `catalog-architecture.md`.
+
 **Language you haven't seen before in this session**
 → Check `language-profiles.md`. If language not listed, ask user: "What command runs your tests?" Then proceed.
 
@@ -59,17 +63,34 @@ Safe, incremental, behavior-preserving code improvements for any language.
 
 ---
 
+## Trigger Words
+
+**Code-level:** `refactor`, `clean up`, `clean this up`, `extract`, `rename`, `simplify`, `decompose`, `restructure`, `improve readability`, `reduce complexity`, `remove duplication`, `pull this out`, `break this apart`, `this is too long`, `hard to understand`, `technical debt`, `code smell`, `too many parameters`, `god class`, `big function`, `make this cleaner`, `this needs work`, `tidy up`, `reorganize`, `modernize`
+
+**Architectural [arch]:** `MVVM`, `MVP`, `MVC`, `Clean Architecture`, `Hexagonal`, `layering`, `too much in the controller`, `fat controller`, `view has logic`, `business logic in the UI`, `anemic model`, `fat service`, `separation of concerns`, `introduce repository`, `add a use case`, `extract interactor`, `layer violation`, `presentation importing data`, `domain importing service`, `architecture`, `restructure layers`, `move to domain`
+
+---
+
 ## Refactoring in 30 Seconds
 
 For experienced users who just want the loop:
 
+**Code-level:**
 1. Read target file(s) completely
 2. Detect smells → present ranked list
 3. Confirm operation order with user
 4. For each step: state op → show diff → apply → run tests → confirm or revert
 5. Summarize changes; suggest (but don't apply) follow-ons
 
-Full detail: [process.md](references/process.md)
+**Architectural:**
+1. Map current architecture (Grep imports, identify layers) → present map
+2. Confirm target pattern with user
+3. Read `safety.md` §8 in full
+4. Detect Family 6 smells → present ranked findings
+5. For each violation: Introduce → Redirect → Remove (one class per step, tests after each)
+6. Summarize; suggest follow-ons
+
+Full detail: [process.md](references/process.md) | Architecture operations: [catalog-architecture.md](references/catalog-architecture.md)
 
 ---
 
