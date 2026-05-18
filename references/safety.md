@@ -92,6 +92,11 @@ Any operation on a file >1000 lines where you have not mapped all callers of the
 
 *Why:* You may be changing something with 50 call sites, 48 of which you haven't seen.
 
+### Agentic Hallucinations
+Proceeding with an operation where a file path, symbol name, or test failure error is guessed or assumed rather than verified through active tool executions (e.g. `grep_search`, `list_dir`, `view_file`, or running terminal commands).
+
+*Why:* AI agents are susceptible to hallucinating files that do not exist or assuming test outcomes without running them. Always verify path existence and outcomes directly through tool outputs.
+
 ---
 
 ## §4 Yellow Lines — Warn and Proceed with Consent

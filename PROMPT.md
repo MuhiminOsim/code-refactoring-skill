@@ -210,6 +210,21 @@ On test failure: revert the edit, state "Reverting [operation] — [test] failed
 | C/C++ | `ctest` | RAII, smart pointers, header/source split |
 | SQL | manual + EXPLAIN | CTEs over subqueries, no SELECT *, named columns |
 
+## Agentic Context & Tool Mastery
+
+- **Never Guess File Paths**: Always run search or directory listing tools (like `grep_search` or `list_dir`) to confirm the exact location of a file before attempting to read or edit it.
+- **Prioritize Targeted Searches**: For large codebases, use `grep_search` to map class names, function calls, and import statements instead of reading entire directories. Reading is expensive; scanning is efficient.
+- **Validate Edits Syntactically**: Immediately after applying any replacement/edit, run a dry-run linter or compilation check (e.g. `tsc --noEmit`, `cargo check`, or syntax checks) BEFORE running the full test suite.
+- **Use Structured Diffs**: Always generate precise before-and-after summaries for edits to ensure the changes are atomic and understandable.
+- **Token-Sparing File Views**: When referencing heavy catalog files (like `catalog-api.md`) or smell catalogs (`smells.md`), **do not load the entire file**. Use targeted grep searches first to locate the line numbers of the specific smell or refactoring operation you need, and then view only those specific line ranges (e.g., `StartLine` to `EndLine`). This saves significant token context.
+
+## Context Preservation Protocol
+
+In long refactoring sessions, AI agents can lose context or suffer from drift. You MUST:
+- **Re-Read Before Edit**: If you haven't viewed a file in the last 10 minutes, re-read it before making any edits. Code in active development may have been modified externally.
+- **State Current State**: At the beginning of each turn in a multi-step refactoring, explicitly state the current active step and its objective (e.g. "We are currently on Step 2 of 4: Extracting `applyTaxes`").
+- **Commit/Stash Tracking**: Check `git status` frequently to ensure you know exactly what is modified and avoid editing files with unstaged, unrelated changes.
+
 ---
 
 ## Quick Rules (always active)
@@ -219,3 +234,4 @@ On test failure: revert the edit, state "Reverting [operation] — [test] failed
 - Never add new behavior while refactoring (no "while I'm here" fixes)
 - Never skip tests because "it's just a rename"
 - Never assume a file hasn't changed since last read in a long session
+

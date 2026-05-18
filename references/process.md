@@ -8,10 +8,11 @@ Follow this process for every refactoring session, regardless of language or ope
 
 **Goal:** Understand the code before touching it.
 
-1. **Read all target files completely** using the Read tool. Do not skim. If a file is >500 lines, read the relevant function/class only — but note the file boundaries.
-2. **Detect the language.** Check `language-profiles.md` for the matching entry. If not listed, ask: *"What command runs your tests?"* — one question, then proceed.
-3. **Find the test harness.** Use Glob to search for test files (`**/*.test.*`, `**/*_test.*`, `**/test_*.*, `**/*.spec.*`, `tests/`, `spec/`). Note the test command.
-4. **Ask ONE clarifying question** if scope is genuinely ambiguous (e.g., "Should I refactor just this function or the whole class?"). Do not ask multiple questions. If scope is clear, skip this step.
+1. **Never Guess File Locations**: Use search tools (like `grep_search` or directory listing tools) to locate files before attempting to read them.
+2. **Read all target files completely** using the View tool. Do not skim. If a file is >500 lines, read the relevant function/class only — but note the file boundaries.
+3. **Detect the language & confirm baseline**: Check `language-profiles.md` for the matching entry. Run the test command once *before* any changes to ensure a green baseline. If not listed, ask: *"What command runs your tests?"* — one question, then proceed.
+4. **Find the test harness**: Use search tools or glob patterns to locate test files.
+5. **Ask ONE clarifying question** if scope is genuinely ambiguous (e.g., "Should I refactor just this function or the whole class?"). Do not ask multiple questions. If scope is clear, skip this step.
 
 Do not make any edits in this phase.
 
@@ -21,7 +22,7 @@ Do not make any edits in this phase.
 
 **Goal:** Diagnose before prescribing.
 
-1. Work through the smell families in `smells.md` against the code you just read.
+1. Work through the smell families in `smells.md` against the code you just read. **To conserve tokens**, do not load `smells.md` in full; use `grep_search` to find candidates, and view only the targeted line ranges.
 2. Rank detected smells:
    - **Blocker** — prevents understanding or modification (e.g., 200-line function, god class)
    - **Major** — significant duplication, coupling, or complexity
@@ -58,7 +59,7 @@ Plan:
 ```
 
 4. **Flag any step that touches the public API, serialization, or concurrency.** Ask for explicit confirmation before including it.
-5. Check `safety.md` §3 Red Lines. If any apply, stop and resolve before proceeding.
+5. Check `safety.md` §3 Red Lines (view only lines 41–101 of `safety.md` to conserve tokens). If any apply, stop and resolve before proceeding.
 
 ---
 
@@ -88,8 +89,9 @@ AFTER:
   function calculateDiscount(user, price) { ... }
   // processOrder() now calls calculateDiscount(user, price)
 ```
-3. **Apply the change** using Edit.
-4. **Run tests** using Bash. Show the exact command and output.
+3. **Apply the change** using your edit/replace tool.
+4. **Syntax/Linter Check**: If the codebase is typed or has a linter, run a fast static check (e.g. `tsc --noEmit`, `eslint`, `mypy`, `cargo check`) BEFORE running the test suite to verify no obvious compile-time errors were introduced.
+5. **Run tests** using the terminal tool. Show the exact command and output.
 5. **On test failure:**
    - Revert the edit immediately (restore original content with Edit)
    - State: *"Reverting: [operation name] — [test name] failed with: [exact error]"*

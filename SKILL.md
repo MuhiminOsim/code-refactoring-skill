@@ -1,14 +1,11 @@
 ---
 name: refactor
 description: >
-  Safe, incremental, behavior-preserving code refactoring for ANY programming language.
-  Detects code smells across 6 families (including architectural violations), applies operations
-  from the Fowler catalog, modern patterns, and architectural patterns (MVVM, MVP, Repository,
-  Use Case, Clean Architecture). Makes one change at a time, verifies tests pass after each step.
-  Trigger on: "refactor", "clean up", "extract", "rename", "simplify", "decompose",
-  "technical debt", "code smell", "god class", "big function", "modernize",
-  "MVVM", "MVP", "fat controller", "view has logic", "anemic model", "layer violation",
-  "introduce repository", "separation of concerns", "architecture", "restructure layers".
+  Safe, behavior-preserving code refactoring for any language. Detects smells (Bloat, OO, Couplers, Layers),
+  applies Fowler & MVVM/Clean Architecture patterns, and runs tests per step.
+  Triggers: refactor, clean up, extract, rename, simplify, decompose, god class, MVVM, Clean Architecture.
+user_invocable: true
+auto_model_invocable: true
 ---
 
 # Refactoring Specialist
@@ -24,6 +21,9 @@ Safe, incremental, behavior-preserving code improvements for any language.
 ---
 
 ## Quick Reference
+
+> [!TIP]
+> **Token Efficiency**: These reference files are large. **Do not read them in full**. Use `grep_search` to find your target topic first, then view only its specific line range.
 
 | What you need | Reference file |
 |---|---|
@@ -91,6 +91,22 @@ For experienced users who just want the loop:
 6. Summarize; suggest follow-ons
 
 Full detail: [process.md](references/process.md) | Architecture operations: [catalog-architecture.md](references/catalog-architecture.md)
+
+## Agentic Context & Tool Mastery
+
+To make this skill highly effective when executed by an autonomous AI agent, adhere to the following tool usage patterns:
+1. **Never Guess File Paths**: Always run search or directory listing tools (like `grep_search` or `list_dir`) to confirm the exact location of a file before attempting to read or edit it.
+2. **Prioritize Targeted Searches**: For large codebases, use `grep_search` to map class names, function calls, and import statements instead of reading entire directories. Reading is expensive; scanning is efficient.
+3. **Validate Edits Syntactically**: Immediately after applying any replacement/edit, run a dry-run linter or compilation check (e.g. `tsc --noEmit`, `cargo check`, or syntax checks) BEFORE running the full test suite.
+4. **Use Structured Diffs**: Always generate precise before-and-after summaries for edits to ensure the changes are atomic and understandable.
+5. **Token-Sparing File Views**: When referencing heavy catalog files (like `catalog-api.md`) or smell catalogs (`smells.md`), **do not load the entire file**. Use targeted grep searches first to locate the line numbers of the specific smell or refactoring operation you need, and then view only those specific line ranges (e.g., `StartLine` to `EndLine`). This saves significant token context.
+
+## Context Preservation Protocol
+
+In long refactoring sessions, AI agents can lose context or suffer from drift. You MUST:
+1. **Re-Read Before Edit**: If you haven't viewed a file in the last 10 minutes, re-read it before making any edits. Code in active development may have been modified externally.
+2. **State Current State**: At the beginning of each turn in a multi-step refactoring, explicitly state the current active step and its objective (e.g. "We are currently on Step 2 of 4: Extracting `applyTaxes`").
+3. **Commit/Stash Tracking**: Check `git status` frequently to ensure you know exactly what is modified and avoid editing files with unstaged, unrelated changes.
 
 ---
 

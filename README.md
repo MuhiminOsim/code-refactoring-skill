@@ -247,6 +247,7 @@ The skill has three tiers of safety enforcement:
 - Moving code with side effects (emails, payments, queues) between layers
 - Introducing a new architectural layer where none existed
 - Moving code that participates in a transaction boundary
+- **Agentic Hallucinations**: Guessing file paths, symbol names, or test failures instead of verifying via active tool executions.
 
 ### Yellow Lines (warn, require confirmation)
 - Renaming a symbol with >20 call sites
@@ -302,6 +303,9 @@ Jumping straight to a requested operation can optimize the wrong thing. Smells a
 
 **Why separate catalog files?**  
 A single 60-operation reference would consume too much context. The decision tree in `SKILL.md` routes to exactly the catalog file needed — a composing refactoring never loads inheritance knowledge.
+
+**Why token-sparing and lazy loading?**  
+AI agents suffer from context fatigue and cost overhead in long sessions. The skill specifies a lazy-loading rule: agents locate sections via targeted searches (`grep_search`) first and load only specific line-ranges (e.g., lines 40–100) using restricted view tools rather than reading whole reference guides.
 
 **Why is safety.md standalone?**  
 Safety protocols must be read in full and are not operation-specific. Scattering stop conditions across catalog files creates inconsistent behavior. A dedicated file makes the red lines impossible to miss.
